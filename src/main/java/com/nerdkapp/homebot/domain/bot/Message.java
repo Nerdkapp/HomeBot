@@ -1,5 +1,5 @@
 
-package com.nerdkapp.homebot.domain;
+package com.nerdkapp.homebot.domain.bot;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

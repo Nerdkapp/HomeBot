@@ -1,5 +1,5 @@
 
-package com.nerdkapp.homebot.domain;
+package com.nerdkapp.homebot.domain.bot;
 
 import java.util.HashMap;
 import java.util.Map;
