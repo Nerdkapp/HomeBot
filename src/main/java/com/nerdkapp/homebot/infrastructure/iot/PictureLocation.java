@@ -13,4 +13,12 @@ public class PictureLocation
   {
     this.image = image;
   }
+
+  @Override
+  public String toString()
+  {
+    return "PictureLocation{" +
+        "image='" + image + '\'' +
+        '}';
+  }
 }

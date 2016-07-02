@@ -1,9 +1,12 @@
 package com.nerdkapp.homebot.infrastructure.resources;
 
+import com.nerdkapp.homebot.domain.bot.MessageSent;
 import com.nerdkapp.homebot.domain.bot.Update;
+import com.nerdkapp.homebot.domain.iot.Camera;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -24,11 +27,23 @@ public class UpdatesResource
 {
   private final Logger log = LoggerFactory.getLogger(this.getClass());
 
+  private Camera camera;
+
+  @Autowired
+  public UpdatesResource(Camera camera)
+  {
+    this.camera = camera;
+  }
+
   @RequestMapping(value = "/updates", method = RequestMethod.POST)
   public void receiveMessage(@RequestBody Update update) {
     log.info("HomeBot has received a message: {}", update);
 
     MultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
+
+    map.add("photo", camera.getPicture());
+    map.add("chat_id", 184011338);
+
     final String filename="somefile.jpg";
     ByteArrayResource contentsAsResource = null;
     try
@@ -43,20 +58,11 @@ public class UpdatesResource
         }
       };
       map.add("photo", contentsAsResource);
-      map.add("chat_id", 184011338);
       RestTemplate restTemplate = new RestTemplate();
-      String result = restTemplate.postForObject("https://api.telegram.org/bot226896590:AAEXOVKAHmR6zwxqdWMupOv_CLf7BjHMSRo/sendPhoto", map, String.class);
-    }
-    catch (FileNotFoundException e1)
-    {
-      e1.printStackTrace();
-    }
-    catch (IOException e1)
-    {
-      e1.printStackTrace();
-    }
-    catch (HttpClientErrorException e2){
-      log.error(e2.getResponseBodyAsString());
+      MessageSent messageSent = restTemplate.postForObject("https://api.telegram.org/bot226896590:AAEXOVKAHmR6zwxqdWMupOv_CLf7BjHMSRo/sendPhoto", map, MessageSent.class);
+      log.info("Message sent: {}", messageSent);
+    }catch (Exception e){
+      log.error("Error: {}", e);
     }
   }
 }
