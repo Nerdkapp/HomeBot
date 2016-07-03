@@ -6,10 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 @Component
 public class RestRaspberryCamera implements Camera
@@ -20,19 +24,37 @@ public class RestRaspberryCamera implements Camera
   @Override
   public ByteArrayResource getPicture()
   {
-    PictureLocation pictureLocation = restTemplate.getForEntity("http://192.168.1.101:8080/takePicture",PictureLocation.class).getBody();
+    PictureLocation pictureLocation = restTemplate.getForEntity("http://192.168.1.101:8080/takePicture", PictureLocation.class).getBody();
 
     log.info("Image retrieved from camera: {}", pictureLocation);
+    final String filename = "somefile.jpg";
+
+    ByteArrayResource contentsAsResource = null;
     try
     {
-      ByteArrayResource byteArrayResource = new ByteArrayResource(IOUtils.toByteArray(new URL("http://192.168.1.101:8080" + pictureLocation.getImage())));
-      log.info("Image size: {}", byteArrayResource.contentLength());
+      try(InputStream in = new URL("http://192.168.1.101:8080" + pictureLocation.getImage()).openStream()){
+        Files.copy(in, Paths.get("/tmp/" + UUID.randomUUID()));
+      }
 
-      return byteArrayResource;
+
+      contentsAsResource = new ByteArrayResource(
+          IOUtils.toByteArray(new FileInputStream(new File("/tmp/image.jpg"))))
+      {
+        @Override
+        public String getFilename()
+        {
+          return filename;
+        }
+      };
+
+//      ByteArrayResource byteArrayResource = new ByteArrayResource(IOUtils.toByteArray(new URL("http://192.168.1.101:8080" + pictureLocation.getImage())));
+      log.info("Image size: {}", contentsAsResource.contentLength());
+
+      return contentsAsResource;
     }
-    catch (IOException e)
+    catch (Exception e)
     {
-      e.printStackTrace();
+      log.error("Error retrieving picture from camera {} ", e);
     }
 
     return null;

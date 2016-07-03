@@ -43,26 +43,8 @@ public class UpdatesResource
 
     map.add("photo", camera.getPicture());
     map.add("chat_id", 184011338);
-
-    final String filename="somefile.jpg";
-    ByteArrayResource contentsAsResource = null;
-    try
-    {
-      contentsAsResource = new ByteArrayResource(
-          IOUtils.toByteArray(new FileInputStream(new File("/Users/lcoccia/Desktop/roma.jpg"))))
-      {
-        @Override
-        public String getFilename()
-        {
-          return filename;
-        }
-      };
-      map.add("photo", contentsAsResource);
-      RestTemplate restTemplate = new RestTemplate();
-      MessageSent messageSent = restTemplate.postForObject("https://api.telegram.org/bot226896590:AAEXOVKAHmR6zwxqdWMupOv_CLf7BjHMSRo/sendPhoto", map, MessageSent.class);
-      log.info("Message sent: {}", messageSent);
-    }catch (Exception e){
-      log.error("Error: {}", e);
-    }
+    RestTemplate restTemplate = new RestTemplate();
+    MessageSent messageSent = restTemplate.postForObject("https://api.telegram.org/bot226896590:AAEXOVKAHmR6zwxqdWMupOv_CLf7BjHMSRo/sendPhoto", map, MessageSent.class);
+    log.info("Message sent: {}", messageSent);
   }
 }
