@@ -40,15 +40,15 @@ public class RestRaspberryCamera implements Camera
     final String filename = "somefile.jpg";
 
     ByteArrayResource contentsAsResource = null;
+    String localFileName = "/tmp/" + UUID.randomUUID() + ".jpg";
     try
     {
       try(InputStream in = new URL(cameraEndpoint + pictureLocation.getImage()).openStream()){
-        Files.copy(in, Paths.get("/tmp/" + UUID.randomUUID()));
+        Files.copy(in, Paths.get(localFileName));
       }
 
-
       contentsAsResource = new ByteArrayResource(
-          IOUtils.toByteArray(new FileInputStream(new File("/tmp/image.jpg"))))
+          IOUtils.toByteArray(new FileInputStream(new File(localFileName))))
       {
         @Override
         public String getFilename()
@@ -57,7 +57,6 @@ public class RestRaspberryCamera implements Camera
         }
       };
 
-//      ByteArrayResource byteArrayResource = new ByteArrayResource(IOUtils.toByteArray(new URL("http://192.168.1.101:8080" + pictureLocation.getImage())));
       log.info("Image size: {}", contentsAsResource.contentLength());
 
       return contentsAsResource;
